@@ -32,5 +32,6 @@ output:
 
 - Online (commercial, owned by Microsoft) service hosting git repositories.
 - Comes with additional features such as *project management and team collaboration*, *releases*, *forks* and *pull requests*.
+- Students get free access to GitHub Pro, which includes the possibility of keeping private repositories: [https://education.github.com/pack](https://education.github.com/pack).
 - There are alternatives, most notably **GitLab** which is in orbit around (but not owned by) Google.
 - ... and  many more: [Wikipedia: comparison of source-code-hosting facilities](https://en.wikipedia.org/wiki/Comparison_of_source-code-hosting_facilities)
