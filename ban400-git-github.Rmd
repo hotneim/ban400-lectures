@@ -1,0 +1,36 @@
+---
+title: "GIT AND GITHUB IN DATA SCIENCE"
+subtitle: "BAN400"
+author: "Håkon Otneim"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    css: [default, default-fonts]
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      slideNumberFormat: " "
+      titleSlideClass: [middle, left, inverse]
+---
+
+
+
+## Brief review of the video lectures
+
+- In the video lectures related to this session we give a brief introduction to the main functionality of Git and Github. 
+
+### Git
+
+- Git is an open source, light-weight, and powerful system for *version control*. 
+- Git keeps track of the state of all the files in a project over time and works essentially as a time machine. We can easily navigate the history of the entire project and return to an earlier point if needed.
+- Git lets us work on several *branches*. This lets us develop experimental features without touching a working/stable project, which can be merged into the main branch when tested and ready.
+- Git comes with tools for handling merge conflicts.
+
+---
+
+### Github
+
+- Online (commercial, owned by Microsoft) service hosting git repositories.
+- Comes with additional features such as *project management and team collaboration*, *releases*, *forks* and *pull requests*.
+- There are alternatives, most notably **GitLab** which is in orbit around (but not owned by) Google.
+- ... and  many more: [Wikipedia: comparison of source-code-hosting facilities](https://en.wikipedia.org/wiki/Comparison_of_source-code-hosting_facilities)
