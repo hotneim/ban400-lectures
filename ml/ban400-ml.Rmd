@@ -1,0 +1,127 @@
+---
+title: "PREDICTIVE ANALYTICS/MACHINE LEARNING"
+subtitle: "BAN400"
+author: "Håkon Otneim"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    css: [default, default-fonts]
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      slideNumberFormat: " "
+      titleSlideClass: [middle, left, inverse]
+---
+
+
+
+## The plan for today
+
+- This course mainly concerns the *programming* aspect of data science. In other words, we deal with a lot of the infrastructure that is necessary to perform data science in practice. 
+- Today, however, we will briefly visit a core topic: namely the statistical modeling that is used to produce *predictions* in data science. This is often labelled *machine learning* or *statistical learning* (and sometimes more vaguely as AI and other fancy terms...).
+- We will only give a superficial treatment today (for completeness). The topic is covered in detail in [BAN404 - Predictive Analytics with R](https://www.nhh.no/en/courses/predictive-analytics-with-r/), due to run in the spring.
+
+
+### Literature
+
+- The standard basic reference to statistical learning (and textbook in BAN404) is [ISL](https://www.statlearning.com/).
+- [ESL](https://web.stanford.edu/~hastie/ElemStatLearn/) is a more advanced book.
+- Both of these are freely available online.
+
+---
+
+## The basic (generalized) linear model 
+
+Let us go back to basics and model the association between a set of explanatory variables (covariates, independent variables, right-hand-side-variables, $X$'s, etc ...) and a response variable (dependent variable, left-hand-side-variable, or just simply ...) $Y$ using the following linear relationship:
+
+$$Y = \beta_0 + \beta_1X_1 + \cdots + \beta_pX_p + \epsilon,$$
+where $\epsilon$ is a random variable typically assumed to be normally distributed. If $Y$ is a continuous variable we call this a *regression problem*.
+
+If $Y$ is a binary (dummy, zero-one) variable, we use the logistic regression:
+
+$$\textrm{logit}(P(Y = 1|X_1,\ldots,X_p)) = \beta_0 + \beta_1X_1 + \cdots + \beta_pX_p.$$
+We call this a *classification problem*. 
+
+- In classical econometrics we are often interested in statistical and causal inference.
+- In modern data science we are more interested in predictions, but this distinction should not be taken too far.
+- We will focus on the classification problem in the examples today, because it is easier to visualize.
+
+---
+
+## The rise of the black box analogy and why we don't like it
+
+```{r, echo = FALSE, out.width="680", fig.align='center'}
+knitr::include_graphics("blackbox.jpg")
+```
+
+---
+
+## Classical example: Customer churn
+
+
+```{r, message = FALSE, echo = FALSE}
+library(dplyr)
+telco <- readr::read_csv("telco-customer-churn/WA_Fn-UseC_-Telco-Customer-Churn.csv") %>% 
+  select(Churn, MonthlyCharges, tenure) %>% 
+  mutate(Churn = as.factor(Churn))
+```
+
+- We have access to a database of current and previous subscribers at a large American cell phone company (Telco).
+- [Data source at Kaggle.](https://www.kaggle.com/blastchar/telco-customer-churn)
+- Number of observations: $n = `r nrow(telco)`$.
+- We know the length of the customer relationship, how much the customer pays each month, and wheter the customer has ended the subscription (churn).
+    - The classical inference question: to what degree do the two variables explain the probability of churn?
+    - The ML-question: How can we classify current customers as either loyal or at risk of ending their subscription? Who do we pick out for targeted marketing?
+
+---
+
+## The churn data: What do we see?
+
+```{r, echo = FALSE, fig.height=7, fig.width=10, fig.retina=3, fig.align='center'}
+library(dplyr)
+library(ggplot2)
+scatter <- 
+  telco %>% 
+  ggplot(aes(x = MonthlyCharges, y = tenure, colour = Churn)) +
+  geom_point() +
+  xlab("Monthly charges ($)") +
+  ylab("Tenure (months)") +
+  scale_color_manual(values=c("#00000030", "#FF0000")) +
+  theme_classic()
+scatter
+```
+
+
+---
+
+## Model complexity and the bias-variance trade-off
+
+---
+
+## Choosing the right complexity, test, train, x-val
+
+---
+
+## Measuring performance
+
+---
+
+## This is not magic. If you stop thinking and ignore the importance of data validity and subject field expertise, you always loose.
+ - Data mining is still a dodgy activity.
+
+---
+
+## Other types of models
+
+- Lasso, ridge, tree-based, neural nets
+
+---
+
+## Tidymodels, churn revisited
+
+
+
+
+  
+
+

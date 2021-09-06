@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>PREDICTIVE ANALYTICS/MACHINE LEARNING</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Håkon Otneim" />
+    <script src="libs/header-attrs-2.10/header-attrs.js"></script>
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/default-fonts.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: middle, left, inverse, title-slide
+
+# PREDICTIVE ANALYTICS/MACHINE LEARNING
+## BAN400
+### Håkon Otneim
+
+---
+
+
+
+
+## The plan for today
+
+- This course mainly concerns the *programming* aspect of data science. In other words, we deal with a lot of the infrastructure that is necessary to perform data science in practice. 
+- Today, however, we will briefly visit a core topic: namely the statistical modeling that is used to produce *predictions* in data science. This is often labelled *machine learning* or *statistical learning* (and sometimes more vaguely as AI and other fancy terms...).
+- We will only give a superficial treatment today (for completeness). The topic is covered in detail in [BAN404 - Predictive Analytics with R](https://www.nhh.no/en/courses/predictive-analytics-with-r/), due to run in the spring.
+
+
+### Literature
+
+- The standard basic reference to statistical learning (and textbook in BAN404) is [ISL](https://www.statlearning.com/).
+- [ESL](https://web.stanford.edu/~hastie/ElemStatLearn/) is a more advanced book.
+- Both of these are freely available online.
+
+---
+
+## The basic (generalized) linear model 
+
+Let us go back to basics and model the association between a set of explanatory variables (covariates, independent variables, right-hand-side-variables, `\(X\)`'s, etc ...) and a response variable (dependent variable, left-hand-side-variable, or just simply ...) `\(Y\)` using the following linear relationship:
+
+`$$Y = \beta_0 + \beta_1X_1 + \cdots + \beta_pX_p + \epsilon,$$`
+where `\(\epsilon\)` is a random variable typically assumed to be normally distributed. If `\(Y\)` is a continuous variable we call this a *regression problem*.
+
+If `\(Y\)` is a binary (dummy, zero-one) variable, we use the logistic regression:
+
+`$$\textrm{logit}(P(Y = 1|X_1,\ldots,X_p)) = \beta_0 + \beta_1X_1 + \cdots + \beta_pX_p.$$`
+We call this a *classification problem*. 
+
+- In classical econometrics we are often interested in statistical and causal inference.
+- In modern data science we are more interested in predictions, but this distinction should not be taken too far.
+- We will focus on the classification problem in the examples today, because it is easier to visualize.
+
+---
+
+## The rise of the black box analogy and why we don't like it
+
+&lt;img src="blackbox.jpg" width="680" style="display: block; margin: auto;" /&gt;
+
+---
+
+## Classical example: Customer churn
+
+
+
+
+- We have access to a database of current and previous subscribers at a large American cell phone company (Telco).
+- [Data source at Kaggle.](https://www.kaggle.com/blastchar/telco-customer-churn)
+- Number of observations: `\(n = 7043\)`.
+- We know the length of the customer relationship, how much the customer pays each month, and wheter the customer has ended the subscription (churn).
+    - The classical inference question: to what degree do the two variables explain the probability of churn?
+    - The ML-question: How can we classify current customers as either loyal or at risk of ending their subscription? Who do we pick out for targeted marketing?
+
+---
+
+## The churn data: What do we see?
+
+&lt;img src="ban400-ml_files/figure-html/unnamed-chunk-3-1.png" width="720" style="display: block; margin: auto;" /&gt;
+
+
+---
+
+## Model complexity and the bias-variance trade-off
+
+---
+
+## Choosing the right complexity, test, train, x-val
+
+---
+
+## Measuring performance
+
+---
+
+## This is not magic. If you stop thinking and ignore the importance of data validity and subject field expertise, you always loose.
+ - Data mining is still a dodgy activity.
+
+---
+
+## Other types of models
+
+- Lasso, ridge, tree-based, neural nets
+
+---
+
+## Tidymodels, churn revisited
+
+
+
+
+  
+
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"slideNumberFormat": " "
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
