@@ -34,3 +34,50 @@ fitted_logistic <-
 
 # Look at the results
 tidy(fitted_logistic)
+
+# Draw the decision boundary for logistic regression:
+newdata <- 
+  expand.grid(MonthlyCharges = seq(20, 120, length.out = 10),
+            tenure = seq(0, 80, length.out = 10))
+
+predictions <- 
+  newdata %>% 
+  bind_cols(pred_prob_logistic = predict(fitted_logistic, 
+                                         new_data = newdata, 
+                                         type = "prob")$.pred_Yes)
+
+scatter +
+  geom_contour_filled(aes(x = MonthlyCharges, 
+                          y = tenure, 
+                          z = pred_prob_logistic),
+                      data = predictions,
+                      inherit.aes = FALSE,
+                      breaks = c(0, 0.5, 1)) +
+  scale_fill_manual(values = c("#FFFFFF00", "#FF000080"), 
+                    name="Predicted probability", 
+                    drop = FALSE) 
+
+# Do a prediction using k-nearest-neighbours (kNN)
+# Requires package: "kknn"
+fitted_knn <-
+  nearest_neighbor(neighbors = 10) %>% 
+  set_engine("kknn") %>% 
+  set_mode("classification") %>% 
+  fit(Churn ~ ., data = telco)
+
+predictions <- 
+  predictions %>% 
+  mutate(pred_prob_knn = predict(fitted_knn, 
+                                 new_data = newdata, 
+                                 type = "prob")$.pred_Yes)
+
+scatter +
+  geom_contour_filled(aes(x = MonthlyCharges, 
+                          y = tenure, 
+                          z = pred_prob_knn),
+                      data = predictions,
+                      inherit.aes = FALSE,
+                      breaks = c(0, 0.5, 1)) +
+  scale_fill_manual(values = c("#FFFFFF00", "#FF000080"), 
+                    name="Predicted probability", 
+                    drop = FALSE) 
