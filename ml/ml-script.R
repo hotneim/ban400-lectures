@@ -5,7 +5,13 @@
 
 library(dplyr)
 library(ggplot2)
-library(tidymodels)      # <- This is new. Tidyverse take on modeling.
+library(tidymodels)      # <- This is new. Tidyverse take on modeling
+
+no_color <- "#00000020"
+yes_color <- "#FF000070"
+pred_color <- c("#FFFFFF00", "#AA3333DD")
+cutoff <- .5
+grid_resolution <- 50
 
 # Read the data
 telco <- 
@@ -20,7 +26,7 @@ scatter <-
   geom_point() +
   xlab("Monthly charges ($)") +
   ylab("Tenure (months)") +
-  scale_color_manual(values=c("#00000030", "#FF0000")) +
+  scale_color_manual(values=c(no_color, yes_color)) +
   theme_classic()
 
 scatter
@@ -37,8 +43,12 @@ tidy(fitted_logistic)
 
 # Draw the decision boundary for logistic regression:
 newdata <- 
-  expand.grid(MonthlyCharges = seq(20, 120, length.out = 10),
-            tenure = seq(0, 80, length.out = 10))
+  expand.grid(MonthlyCharges = seq(from = 20, 
+                                   to = 120, 
+                                   length.out = grid_resolution),
+            tenure = seq(from = 0, 
+                         to =80, 
+                         length.out = grid_resolution))
 
 predictions <- 
   newdata %>% 
@@ -53,14 +63,14 @@ scatter +
                       data = predictions,
                       inherit.aes = FALSE,
                       breaks = c(0, 0.5, 1)) +
-  scale_fill_manual(values = c("#FFFFFF00", "#FF000080"), 
+  scale_fill_manual(values = pred_color, 
                     name="Predicted probability", 
                     drop = FALSE) 
 
 # Do a prediction using k-nearest-neighbours (kNN)
 # Requires package: "kknn"
 fitted_knn <-
-  nearest_neighbor(neighbors = 10) %>% 
+  nearest_neighbor(neighbors =30) %>% 
   set_engine("kknn") %>% 
   set_mode("classification") %>% 
   fit(Churn ~ ., data = telco)
@@ -78,6 +88,6 @@ scatter +
                       data = predictions,
                       inherit.aes = FALSE,
                       breaks = c(0, 0.5, 1)) +
-  scale_fill_manual(values = c("#FFFFFF00", "#FF000080"), 
+  scale_fill_manual(values = pred_color, 
                     name="Predicted probability", 
                     drop = FALSE) 
