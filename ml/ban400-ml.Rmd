@@ -77,20 +77,123 @@ telco <- readr::read_csv("telco-customer-churn/WA_Fn-UseC_-Telco-Customer-Churn.
 
 ## The churn data: What do we see?
 
-```{r, echo = FALSE, fig.height=7, fig.width=10, fig.retina=3, fig.align='center'}
+```{r, echo = FALSE, message = FALSE, warning = FALSE, fig.height = 7, fig.width = 10, fig.retina = 3, fig.align='center'}
 library(dplyr)
 library(ggplot2)
+library(tidymodels)      # <- This is new. Tidyverse take on modeling
+
+no_color <- "#00000020"
+yes_color <- "#FF000070"
+pred_color <- c("#FFFFFF00", "#AA3333DD")
+cutoff <- .5
+grid_resolution <- 50
+
+# Read the data
+telco <- 
+  readr::read_csv("telco-customer-churn/WA_Fn-UseC_-Telco-Customer-Churn.csv") %>% 
+  select(Churn, MonthlyCharges, tenure) %>% 
+  mutate(Churn = as.factor(Churn))
+
+# Make a basic scatterplot 
 scatter <- 
   telco %>% 
   ggplot(aes(x = MonthlyCharges, y = tenure, colour = Churn)) +
   geom_point() +
   xlab("Monthly charges ($)") +
   ylab("Tenure (months)") +
-  scale_color_manual(values=c("#00000030", "#FF0000")) +
+  scale_color_manual(values=c(no_color, yes_color)) +
   theme_classic()
+
 scatter
 ```
 
+---
+
+## Logistic regression decision boundary
+
+```{r, echo = FALSE, message = FALSE, warning = FALSE, fig.height = 7, fig.width = 10, fig.retina = 3, fig.align='center'}
+# Fit a logistic regression to the data using tidymodels
+fitted_logistic <-
+  logistic_reg() %>% 
+  set_engine("glm") %>% 
+  set_mode("classification") %>% 
+  fit(Churn ~ ., data = telco)
+
+# Draw the decision boundary for logistic regression:
+newdata <- 
+  expand.grid(MonthlyCharges = seq(from = 20, 
+                                   to = 118, 
+                                   length.out = grid_resolution),
+            tenure = seq(from = 0, 
+                         to = 70, 
+                         length.out = grid_resolution))
+
+predictions <- 
+  newdata %>% 
+  bind_cols(pred_prob_logistic = predict(fitted_logistic, 
+                                         new_data = newdata, 
+                                         type = "prob")$.pred_Yes)
+
+scatter +
+  geom_contour_filled(aes(x = MonthlyCharges, 
+                          y = tenure, 
+                          z = pred_prob_logistic),
+                      data = predictions,
+                      inherit.aes = FALSE,
+                      breaks = c(0, 0.5, 1)) +
+  scale_fill_manual(values = pred_color, 
+                    name="Predicted probability", 
+                    drop = FALSE) +
+  guides(fill = FALSE) +
+  geom_contour(aes(x = MonthlyCharges, 
+                   y = tenure, 
+                   z = pred_prob_logistic),
+               data = predictions,
+               inherit.aes = FALSE,
+               breaks = c(0, 0.5, 1),
+               colour = "black",
+               size = 1.5)
+```
+
+---
+
+## Pros and cons of using LR for classification
+
+- The logistic regression is a classical econometric model designed for *statistical inference*, i.e. figuring out which explanatory variables contributes to variation in the "success probability" $P(Y = 1)$, and in which direction.
+- The logistic regression defines a proper probability model:
+\begin{equation}
+\log\left(\frac{P(Y = 1)}{1 - P(Y=1)}\right) = \beta_0 + \beta_1X_1 + \cdots + \beta_pX_p.
+\end{equation}
+- This is classical parametric statistics. Unless you introduce polynomial terms, the LR *always* leads to a straight line decision boundary.
+- the LR is interpretable, requires less data (because we have decided the shape of the boundary even before we see any data).
+- But if we
+    1. don't want to assume that this probability model is (approximately) true, and
+    2. are more interested in predicting the status of new customers than interpreting the estimated model,
+    3. (and have a reasonable amount of data),
+- we might want to do something else!
+
+---
+
+## A simple, yet powerful idea
+
+- Make predictions based on *similarity*.
+- That is: when predicting the status of a new customer $A$, look at your data set of known outcomes, and specifically the customers the are most *similar* to $A$.
+    - If the customers that are most similar to $A$ tend to churn a lot, then predict $A$ to be a churner as well. 
+    - If the customers that are most similar to $A$ do not tend to churn, then predict $A$ to be a safe customer.
+- This is basically the starting point of the relatively recent popularity of (data science/predictive analytics/machine learning/deep learning/statistical learning/AI/...), choose your own poison.
+- Today we will look at some basic principles of this idea, and point to some fallacies.
+
+---
+
+## A simple algorithm: kNN, k nearest neighbours
+
+```{r, echo = FALSE, out.width="680", fig.align='center'}
+knitr::include_graphics("knn.jpg")
+```
+
+$k$ nearest neighbours algorithm for predicting the class of a new individual:
+
+- Select an integer $k$.
 
 ---
 

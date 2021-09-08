@@ -47,7 +47,7 @@ newdata <-
                                    to = 120, 
                                    length.out = grid_resolution),
             tenure = seq(from = 0, 
-                         to =80, 
+                         to = 80, 
                          length.out = grid_resolution))
 
 predictions <- 
@@ -65,12 +65,20 @@ scatter +
                       breaks = c(0, 0.5, 1)) +
   scale_fill_manual(values = pred_color, 
                     name="Predicted probability", 
-                    drop = FALSE) 
+                    drop = FALSE) +
+  geom_contour(aes(x = MonthlyCharges, 
+                   y = tenure, 
+                   z = pred_prob_logistic),
+               data = predictions,
+               inherit.aes = FALSE,
+               breaks = c(0, 0.5, 1),
+               colour = "black",
+               size = 1.5)
 
 # Do a prediction using k-nearest-neighbours (kNN)
 # Requires package: "kknn"
 fitted_knn <-
-  nearest_neighbor(neighbors =30) %>% 
+  nearest_neighbor(neighbors = 50) %>% 
   set_engine("kknn") %>% 
   set_mode("classification") %>% 
   fit(Churn ~ ., data = telco)

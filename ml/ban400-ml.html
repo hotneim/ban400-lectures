@@ -78,6 +78,49 @@ We call this a *classification problem*.
 
 &lt;img src="ban400-ml_files/figure-html/unnamed-chunk-3-1.png" width="720" style="display: block; margin: auto;" /&gt;
 
+---
+
+## Logistic regression decision boundary
+
+&lt;img src="ban400-ml_files/figure-html/unnamed-chunk-4-1.png" width="720" style="display: block; margin: auto;" /&gt;
+
+---
+
+## Pros and cons of using LR for classification
+
+- The logistic regression is a classical econometric model designed for *statistical inference*, i.e. figuring out which explanatory variables contributes to variation in the "success probability" `\(P(Y = 1)\)`, and in which direction.
+- The logistic regression defines a proper probability model:
+`\begin{equation}
+\log\left(\frac{P(Y = 1)}{1 - P(Y=1)}\right) = \beta_0 + \beta_1X_1 + \cdots + \beta_pX_p.
+\end{equation}`
+- This is classical parametric statistics. Unless you introduce polynomial terms, the LR *always* leads to a straight line decision boundary.
+- the LR is interpretable, requires less data (because we have decided the shape of the boundary even before we see any data).
+- But if we
+    1. don't want to assume that this probability model is (approximately) true, and
+    2. are more interested in predicting the status of new customers than interpreting the estimated model,
+    3. (and have a reasonable amount of data),
+- we might want to do something else!
+
+---
+
+## A simple, yet powerful idea
+
+- Make predictions based on *similarity*.
+- That is: when predicting the status of a new customer `\(A\)`, look at your data set of known outcomes, and specifically the customers the are most *similar* to `\(A\)`.
+    - If the customers that are most similar to `\(A\)` tend to churn a lot, then predict `\(A\)` to be a churner as well. 
+    - If the customers that are most similar to `\(A\)` do not tend to churn, then predict `\(A\)` to be a safe customer.
+- This is basically the starting point of the relatively recent popularity of (data science/predictive analytics/machine learning/deep learning/statistical learning/AI/...), choose your own poison.
+- Today we will look at some basic principles of this idea, and point to some fallacies.
+
+---
+
+## A simple algorithm: kNN, k nearest neighbours
+
+&lt;img src="knn.jpg" width="680" style="display: block; margin: auto;" /&gt;
+
+`\(k\)` nearest neighbours algorithm for predicting the class of a new individual:
+
+- Select an integer `\(k\)`.
 
 ---
 
