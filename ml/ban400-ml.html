@@ -4,7 +4,7 @@
     <title>PREDICTIVE ANALYTICS/MACHINE LEARNING</title>
     <meta charset="utf-8" />
     <meta name="author" content="Håkon Otneim" />
-    <script src="libs/header-attrs-2.10/header-attrs.js"></script>
+    <script src="libs/header-attrs-2.7/header-attrs.js"></script>
     <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
     <link href="libs/remark-css-0.0.1/default-fonts.css" rel="stylesheet" />
   </head>
@@ -17,7 +17,6 @@ class: middle, left, inverse, title-slide
 ### Håkon Otneim
 
 ---
-
 
 
 
@@ -64,6 +63,9 @@ We call this a *classification problem*.
 
 
 
+```
+## Warning: package 'dplyr' was built under R version 4.0.5
+```
 
 - We have access to a database of current and previous subscribers at a large American cell phone company (Telco).
 - [Data source at Kaggle.](https://www.kaggle.com/blastchar/telco-customer-churn)
@@ -121,10 +123,18 @@ We call this a *classification problem*.
 `\(k\)` nearest neighbours algorithm for predicting the class of a new individual:
 
 - Select an integer `\(k\)`.
+- Identify the `\(k\)` individuals in the training data which is closest/most similar to the new individual.
+- Perform a "majority vote" among these individuals in order to predict the status of the new individual.
 
 ---
 
-## Model complexity and the bias-variance trade-off
+## It is crucial to select a good value for `\(k\)`
+
+
+&lt;img src="ban400-ml_files/figure-html/unnamed-chunk-6-1.png" width="720" /&gt;
+- `\(k = 1\)` gives a *perfect* prediction on the training data, but horrible predictions -- the model is *overfitted*.
+- `\(k = n\)` results in total ignorance of the explanatory variables. You always predict into the majority class in the training data -- it is *underfitted*.
+- The best value must lie somewhere in between, **but where, and how do we find it?**
 
 ---
 

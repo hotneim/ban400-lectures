@@ -14,7 +14,6 @@ output:
 ---
 
 
-
 ## The plan for today
 
 - This course mainly concerns the *programming* aspect of data science. In other words, we deal with a lot of the infrastructure that is necessary to perform data science in practice. 
@@ -194,10 +193,62 @@ knitr::include_graphics("knn.jpg")
 $k$ nearest neighbours algorithm for predicting the class of a new individual:
 
 - Select an integer $k$.
+- Identify the $k$ individuals in the training data which is closest/most similar to the new individual.
+- Perform a "majority vote" among these individuals in order to predict the status of the new individual.
 
 ---
 
-## Model complexity and the bias-variance trade-off
+## It is crucial to select a good value for $k$
+
+
+```{r, echo = FALSE, warning = FALSE, message = FALSE, fig.height = 5, fig.width = 10, fig.retina=2.5, cache = TRUE}
+
+knn_plots <- list()
+negh <- c(3, 60, 3000)
+
+for(k in seq_along(negh)) {
+  fitted_knn <-
+    nearest_neighbor(neighbors = negh[k]) %>% 
+    set_engine("kknn") %>% 
+    set_mode("classification") %>% 
+    fit(Churn ~ ., data = telco)
+  
+  predictions <- 
+    predictions %>% 
+    mutate(pred_prob_knn = predict(fitted_knn, 
+                                   new_data = newdata, 
+                                   type = "prob")$.pred_Yes)
+  
+  knn_plots[[k]] <- 
+    scatter +
+    geom_contour_filled(aes(x = MonthlyCharges, 
+                            y = tenure, 
+                            z = pred_prob_knn),
+                        data = predictions,
+                        inherit.aes = FALSE,
+                        breaks = c(0, 0.5, 1)) +
+    scale_fill_manual(values = pred_color, 
+                      name="Predicted probability", 
+                      drop = FALSE) +
+    geom_contour(aes(x = MonthlyCharges, 
+                     y = tenure, 
+                     z = pred_prob_knn),
+                 data = predictions,
+                 inherit.aes = FALSE,
+                 breaks = c(0, 0.5, 1),
+                 colour = "black",
+                 size = 1.5)+
+    ggtitle(paste("k =", negh[k]))
+  
+}
+
+library(patchwork)
+knn_plots[[1]] + knn_plots[[2]] + knn_plots[[3]] + plot_layout(guides = "collect" ) & theme(legend.position = 'bottom')
+
+```
+- $k = 1$ gives a *perfect* prediction on the training data, but horrible predictions -- the model is *overfitted*.
+- $k = n$ results in total ignorance of the explanatory variables. You always predict into the majority class in the training data -- it is *underfitted*.
+- The best value must lie somewhere in between, **but where, and how do we find it?**
 
 ---
 
