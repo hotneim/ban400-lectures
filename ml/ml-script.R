@@ -202,3 +202,5 @@ scatter +
                colour = "black",
                size = 1.5)
 
+## E-mail data, desicion tree, random forest xgboost, comparison test and train
+## data, comparison using auc.
