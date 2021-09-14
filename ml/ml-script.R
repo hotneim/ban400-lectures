@@ -98,4 +98,107 @@ scatter +
                       breaks = c(0, 0.5, 1)) +
   scale_fill_manual(values = pred_color, 
                     name="Predicted probability", 
-                    drop = FALSE) 
+                    drop = FALSE) +
+  geom_contour(aes(x = MonthlyCharges, 
+                   y = tenure, 
+                   z = pred_prob_knn),
+               data = predictions,
+               inherit.aes = FALSE,
+               breaks = c(0, 0.5, 1),
+               colour = "black",
+               size = 1.5)
+
+# Tune the kNN using cross-validation -----
+
+# Split the data into training and testing set
+set.seed(1)
+telco_split <- initial_split(telco, strata = Churn)
+telco_train <- training(telco_split)
+telco_test  <- testing (telco_split)
+
+telco_folds <- vfold_cv(telco_train, strata = Churn)
+
+# Specify the model 
+knn_mod <- 
+  nearest_neighbor(neighbors = tune()) %>% 
+  set_mode("classification") %>% 
+  set_engine("kknn") 
+  
+# Specify the recipe
+knn_recipe <- 
+  recipe(Churn ~ ., data = telco)
+
+# Set up the workflow
+knn_workflow <- 
+  workflow() %>% 
+  add_model(knn_mod) %>% 
+  add_recipe(knn_recipe)
+
+# Make a search grid for the k-parameter
+knn_grid <- grid_latin_hypercube(
+  neighbors(c(3, round(nrow(telco)/5))),
+  size = 15
+)
+
+# Calculate the cross-validated AUC for all the k's in the grid
+knn_tune_result <- 
+  tune_grid(
+    knn_workflow,
+    resamples = telco_folds,
+    grid = knn_grid,
+    control = control_grid(save_pred = TRUE)
+  )
+
+# Which k is the best?
+knn_tune_result %>%
+  select_best(metric = "roc_auc") 
+
+# Put the best k in the workflow
+knn_tuned <- 
+  finalize_workflow(
+    knn_workflow,
+    parameters = knn_tune_result %>% select_best(metric = "roc_auc")
+  )
+
+# Fit the model
+fitted_knn <- 
+  knn_tuned %>% 
+  fit(data = telco_train)
+
+# Predict the test data
+predictions_testing <- 
+  fitted_knn %>% 
+  predict(new_data = telco_test,
+          type = "prob") %>% 
+  mutate(truth = telco_test$Churn)
+
+# Calculate the AUC
+predictions_testing %>% 
+           roc_auc(truth, .pred_No)
+
+# Draw the decision boundary
+predictions <- 
+  predictions %>% 
+  mutate(pred_prob_knn = predict(fitted_knn, 
+                                 new_data = newdata, 
+                                 type = "prob")$.pred_Yes)
+
+scatter +
+  geom_contour_filled(aes(x = MonthlyCharges, 
+                          y = tenure, 
+                          z = pred_prob_knn),
+                      data = predictions,
+                      inherit.aes = FALSE,
+                      breaks = c(0, 0.5, 1)) +
+  scale_fill_manual(values = pred_color, 
+                    name="Predicted probability", 
+                    drop = FALSE) +
+  geom_contour(aes(x = MonthlyCharges, 
+                   y = tenure, 
+                   z = pred_prob_knn),
+               data = predictions,
+               inherit.aes = FALSE,
+               breaks = c(0, 0.5, 1),
+               colour = "black",
+               size = 1.5)
+

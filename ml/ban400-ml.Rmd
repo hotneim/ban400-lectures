@@ -252,30 +252,82 @@ knn_plots[[1]] + knn_plots[[2]] + knn_plots[[3]] + plot_layout(guides = "collect
 
 ---
 
-## Choosing the right complexity, test, train, x-val
+## Choosing the right complexity
+
+- If we use the same data for *estimating (training)* the model and *choosing the complexity* we make the classical overfitting mistake.
+- In the kNN case, we will always end up with $k=1$, because that gives perfect predictions on the training data.
+- It will result in catastrophic predictions, however.
+- We can fix this by splitting the data randomly into three parts:
+
+```{r, echo = FALSE, out.width="680", fig.align='center'}
+knitr::include_graphics("train-val-test.jpg")
+```
+    
+- The three parts of the data set play different roles when estimating the model:  
+    - The **training data** is used to estimate/train the model.
+    - We use the **validation data** to tune the model: Which value of $k$, when used to estimate the model using the training data, gives the best predictions on the validations set?
+    - We use the **testing data** to test the model afterwards: how well does the model predict unseen data (out-of-sample)?.
+- It is **abslolutely crucial** that the testing data is kept separate from model training and tuning. Checking predictions on data that was used to train a model is considered cheating!
+---
+
+## Slightly more sophisticated: Cross-validation
+
+- We can use the data more efficiently using cross-validation:
+
+```{r, echo = FALSE, out.width="680", fig.align='center'}
+knitr::include_graphics("x-val.jpg")
+```
+
+- Split your training data randomly into $m$ random folds (splits).
+- (Unfortunately, the symbol $k$ is typically used for this number as well, but we will use $m$ to separate it from the $k$ in kNN).
+- For each candidate values of $k$:
+    - For each validation set 1:m:
+        - Estimate the model on the remaining training data and record the predictions on the validation set.
+    - Report the average prediction error over all $m$ folds.
+- Choose the value of $k$ that gives the smallest "cross-validated" prediction error.
+- In the end you test the model on the test data as usual.
+- **Very precise, but also very computer intensive.**
 
 ---
 
 ## Measuring performance
 
+We can measure the performance of prediction models in many ways. 
+
+- Making a confusion matrix:
+   
+|               | True 0              | True 1              |
+|---------------|---------------------|---------------------|
+| Predicted 0   | True negative (TN)  | False negative (FN) |
+| Predicted 1   | False positive      | True positive (TP)  |
+
+- Drawing the reciever operating characteristic (ROC), takes all classification thresholds into account:
+
+.pull-left[
+```{r, echo = FALSE, out.width="250", fig.align='center'}
+knitr::include_graphics("roc.jpg")
+```
+]
+.pull-right[
+- A numeric measure of over-all predictive power is the AUC (Area under the curve). 
+    - AUC = 0.5 is random guessing 
+    - AUC = 1 is perfect prediction.
+]
+    
+
 ---
 
-## This is not magic. If you stop thinking and ignore the importance of data validity and subject field expertise, you always loose.
- - Data mining is still a dodgy activity.
+## This is not magic. 
 
----
-
-## Other types of models
-
-- Lasso, ridge, tree-based, neural nets
-
----
-
-## Tidymodels, churn revisited
-
-
-
-
-  
-
+.pull-left[
+```{r, echo = FALSE, out.width="250", fig.align='center'}
+knitr::include_graphics("the-9-pitfalls-of-data-science.jpg")
+```
+]
+.pull-right[
+- Data science is a young, but large field that covers parts of applied statistics, mathematics, computer science and informatics.
+- Personal opinion: lots of the Kaggle-type "data science" predict-whatever-using-lots-of-variables is garbage.
+- If you stop thinking and ignore the importance of data validity and subject field expertise, you always loose.
+- Data mining is (still) a dodgy activity.
+]
 
