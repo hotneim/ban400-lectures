@@ -1,7 +1,9 @@
 
-# ------------------------------------ #
-# BAN400 - SESSION ON MACHINE LEARNING #
-# ------------------------------------ #
+## ------
+## ------    BAN400
+## ------    LECTURE:       MACHINE LEARNING
+## ------    DATA SOURCE:   https://www.kaggle.com/blastchar/telco-customer-churn
+## ------
 
 library(dplyr)
 library(ggplot2)
