@@ -10,7 +10,7 @@ library(dplyr)
 library(tidymodels)
 library(rpart)           # For decision trees
 library(rpart.plot)      # Separate package for plotting trees
-library(xgboost)         # For xgboost
+
 
 # Read data ------
 names <- 
@@ -124,92 +124,26 @@ auc_tree <-
               mutate(where = "train")) %>% 
   mutate(model = "decision_tree")
 
-# XGBOOST -----------
+# Exercise: The classification tree is relatively simple, and is very dependent
+# on the initial split. This means that there might very well be an initial
+# split that gives a less clean split in the first step, but gives a better
+# prediction after later splits.
+#
+# One way to solve this is to grow many trees, in which only a random subset of
+# the variables are available at each split. One can grow hundreds and thousands
+# of such prediction trees and average the predictions. This results in the
+# *random forest* algorithm.
+
+# The random forest can be improved in a couple of somewhat technical ways,
+# leading to the very popular xgboost-algorithm, see
+# https://en.wikipedia.org/wiki/XGBoost. See also the following master thesis
+# from NTNU (with almost 200 citations in the scientific literature!!!):
+# https://ntnuopen.ntnu.no/ntnu-xmlui/handle/11250/2433761.
+
+# Tune an xgboost model to the e-mail spam data set. Does is give better
+# predictions than the random forest?
+
+# See this blog post for a demonstration of tuning xgboost using tidymodels:
 # Taken from: https://juliasilge.com/blog/xgboost-tune-volleyball/
-
-
-# Specify the decistion tree
-xgb_mod <- 
-  boost_tree(
-    trees = 1000, 
-    tree_depth = tune(), min_n = tune(), 
-    loss_reduction = tune(),                     ## first three: model complexity
-    sample_size = tune(), mtry = tune(),         ## randomness
-    learn_rate = tune()                          ## step size
-  ) %>% 
-  set_engine("xgboost") %>% 
-  set_mode("classification")
-
-# Set up the workflow
-xgb_workflow <- 
-  workflow() %>% 
-  add_model(xgb_mod) %>% 
-  add_recipe(spam_recipe)
-
-# Make a search grid for the k-parameter
-xgb_grid <- grid_latin_hypercube(
-  tree_depth(),
-  min_n(),
-  loss_reduction(),
-  sample_size = sample_prop(),
-  finalize(mtry(), spam_train),
-  learn_rate(),
-  size = 30
-)
-
-# Calculate the cross-validated AUC for all the parameter configurations in the
-# grid Takes some time, so we save and load.
-# xgb_tune_result <- 
-#   tune_grid(
-#     xgb_workflow,
-#     resamples = spam_folds,
-#     grid = xgb_grid,
-#     control = control_grid(save_pred = TRUE)
-#   )
-# save(xgb_tune_result, file = "xgb_tune_result.Rdata")
-
-load("xgb_tune_result.Rdata")
-
-# Which parameter combination is the best?
-xgb_tune_result %>%
-  select_best(metric = "roc_auc") 
-
-# Put the best parameters in the workflow
-xgb_tuned <- 
-  finalize_workflow(
-    xgb_workflow,
-    parameters = xgb_tune_result %>% select_best(metric = "roc_auc")
-  )
-
-# Fit the model
-fitted_xgb <- 
-  xgb_tuned %>% 
-  fit(data = spam_train)
-
-# Predict the train and test data
-predictions_xgb_test <- 
-  fitted_xgb %>% 
-  predict(new_data = spam_test,
-          type = "prob") %>% 
-  mutate(truth = spam_test$spam) 
-
-predictions_xgb_train <- 
-  fitted_xgb %>% 
-  predict(new_data = spam_train,
-          type = "prob") %>% 
-  mutate(truth = spam_train$spam) 
-
-
-# Calculate the AUC
-auc_xgb <- 
-  predictions_xgb_test %>% 
-  roc_auc(truth, .pred_0) %>% 
-  mutate(where = "test") %>% 
-  bind_rows(predictions_xgb_train %>% 
-              roc_auc(truth, .pred_0) %>% 
-              mutate(where = "train")) %>% 
-  mutate(model = "xgb") 
-
-bind_rows(auc_tree, auc_xgb)
 
 
