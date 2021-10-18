@@ -147,8 +147,7 @@ knn_tune_result <-
   tune_grid(
     knn_workflow,
     resamples = telco_folds,
-    grid = knn_grid,
-    control = control_grid(save_pred = TRUE)
+    grid = knn_grid
   )
 
 # Which k is the best?
