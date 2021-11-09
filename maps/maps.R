@@ -106,6 +106,11 @@ cholera_latlon <-
   as_tibble %>% 
   mutate(Count = ColeraDeaths$Count)
 
+london <- make_bbox(cholera_latlon$X, 
+                    cholera_latlon$Y, 
+                    f = .05)
+m <- get_map(london, zoom = 17, source = "osm")
+
 ggmap(m) +
   geom_point(aes(x = X, y = Y, size = Count), data = cholera_latlon)
 
@@ -113,32 +118,45 @@ ggmap(m) +
 
 # EXAMPLE 2: Water sources in Africa --------------
 
-# These packages contains shapefiles for the countries of the worls
+# These packages contains shapefiles for the countries of the world (as well as a lot of other information about the countries)
 library(rnaturalearth)
 library(rnaturalearthdata)
 library(rgeos)
 
+# This is a data set that is published on the "Tidy Tuesday"-project, a Github
+# repository that publishes a new data set every week for the online data
+# science community to analyze. This data set contains information on water sources in the world, but mainly in Africa.
 water <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-05-04/water.csv")
+
+# Here, we make a data frame for all the countries of the world. This requires all of the three packages above to be loaded.
 world <- ne_countries(scale = "medium", returnclass = "sf")
 
+# Let us concentrate on just one country, we filter out all other
 tanzania <- world[world$name == "Tanzania",]
 
+# We do the same for the water sources data. When making the plots later we will see that there are a couple of strange data points with latitude > 60. These are obviously not in Tanzania, so  just filter them out.
 tan_data <- 
   water %>% 
   filter(country_name == "Tanzania") %>% 
   filter(lat_deg < 60)                   # Some weird data points
 
-# Plot the country
+# We make a simple plot of the borders of the country using the plotting method geom_sf() that is especially built for these kind of shape-objects. 
 ggplot(st_geometry(tanzania)) +
   geom_sf()
 
-# Add the water sources
+# Add the water sources in the normal way. The coordinate systems appears to be
+# compatible in this case, and the figure is in any case not so sensitive to
+# such discrepancies when we are working on such a large area, and not on the
+# street level as we did above.
 ggplot(st_geometry(tanzania)) +
   geom_sf() +
   geom_point(aes(x = lon_deg, y = lat_deg), 
              data = tan_data) 
 
-# Make a nice map
+# Make a nice map. I have used the fira-theme, becuase it is very nice. You need
+# to install this yourself by following the link below, and that also requires
+# the installation of a font. I you want to use another theme, replace (or take
+# out) theme_fira() and scale_color_fira() below.
 library(firatheme)                # My favourite ggplot theme: https://github.com/vankesteren/firatheme
 ggplot(st_geometry(tanzania)) +
   geom_sf(fill = "#00000050") +
@@ -157,8 +175,7 @@ ggplot(st_geometry(tanzania)) +
 
 # Downloaded shapefiles for other features of Tanzania here:
 # https://mapcruzin.com/free-tanzania-arcgis-maps-shapefiles.htm
-# (Just made a Google search for Tanzania shapefiles)
-
+# (Just made a Google search for Tanzania shapefiles). Read them in in the same way as for the London-example. The places-file includes a column on type, so we filter it down to just the major cities. We make the coordinates as separate columns and plot these "manually" so that we can plot the names of the cities as well as indicating their positions:
 tan_roads <- read_sf("tanzania_roads")
 tan_cities <- 
   read_sf("tanzania_places") %>% 
@@ -169,10 +186,13 @@ tan_cities <-
   mutate(Y = st_coordinates(.$geometry)[,2])
 tan_waterways <- read_sf("tanzania_waterways")
 
+# We add the roads, waterways and cities to the map. Takes quite a lot of time
+# to create, but the result is really nice!
 ggplot(st_geometry(tanzania)) +
   geom_sf(fill = "#00000050") +
   geom_point(aes(x = lon_deg, y = lat_deg, colour = water_source), 
-             data = tan_data) +
+             data = tan_data,
+             alpha = .5) +
   xlab("") +
   ylab("") +
   labs(colour = "") +
@@ -187,9 +207,70 @@ ggplot(st_geometry(tanzania)) +
   geom_point(aes(x = X, y = Y), data = tan_cities, size = 2) +
   geom_text(aes(x = X, y = Y, label = name), 
             data = tan_cities, 
-            colour = "#999999", 
-            position = "right")
+            nudge_y = 0.3) +
+  geom_sf(data = st_geometry(tan_waterways), colour = "darkblue", alpha = .3)
 
 # EXAMPLE 3: Water sources in Africa, continued ------------
 
+# Another important type of plots is to color countries according to some
+# variable. We have all seen this kind of plots in the pandemic.
+
+# We start by filtering the "world" data frame above to include the countries of
+# Africa, and the information about this in contained in the "continent"
+# variable. We need to join the data on the geometry of the countries with the
+# water data later, so we need the country names to match exactly. A bit further
+# down we have an anti_join() for finding mismatches, and we fix them here with
+# a recode:
+africa <- 
+  world %>% 
+  filter(continent == "Africa") %>% 
+  select(admin, geometry) %>% 
+  mutate(admin = recode(.$admin, 
+                        "Democratic Republic of the Congo" = "Congo - Kinshasa",
+                        "Republic of Congo" = "Congo - Brazzaville",
+                        "United Republic of Tanzania" = "Tanzania")) %>% 
+  rename(country_name = admin)
+
+# We make a basic plot of the countries and see that it looks reasonable:
+ggplot(africa, aes(geometry = geometry)) +
+  geom_sf() 
+
+# There is a binary variable in the water source data that indicates whether
+# there is water available at the time of the visit. Let us calculate the share
+# of active water sources for each country:
+water_share <- 
+  water %>% 
+  group_by(country_name) %>% 
+  summarise(share_status = mean(status_id == "y")) 
+
+# We use the anti_jon to chech which countries in the water-data that does not
+# have matches in the africa data. Identifies that the two Congos and Tanzania
+# were spelled differently, fixed that above when filtering down the africa
+# data.
+anti_join(water_share, africa)
+
+# We join, first a full join to get both the water data and the geometry data in the dame column, and then a semi-join to filter out all countries that are not in the Africa data (there are a few non-African countries in the water data).
+water_africa <- 
+  full_join(water_share, africa) %>% 
+  semi_join(africa) 
+
+# Basic plot, where we map the fill-aesthetic to the share-variable:
+ggplot(water_africa) +
+  geom_sf(aes(geometry = geometry, fill = share_status)) 
+
+# Make a prettier plot. Again, drop the firatheme if you have not bothered to
+# install it.
+ggplot(water_africa) +
+  geom_sf(aes(geometry = geometry, fill = share_status)) +
+  scale_fill_gradient(
+    low = "white",
+    high = "red") +
+  ggtitle("Share of active water sources") +
+  labs(fill = "") +
+  theme_fira() +
+  scale_colour_fira(na.value = "darkred") +
+  theme(axis.line = element_blank(),
+        panel.grid.major = element_line(colour = "#00000020", 
+                                        inherit.blank = FALSE),
+        axis.text = element_text(colour = "#00000050"))
 
