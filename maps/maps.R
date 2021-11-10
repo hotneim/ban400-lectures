@@ -38,15 +38,22 @@ summary(ColeraDeaths)
 
 # We have 250 spatial points, and for each point we have an ID-column (that
 # seems to only contain zeros) as well as a Count column that contains the
-# number of victims at that address. The Geomety column contains the definitions
+# number of victims at that address. The geomety column contains the definitions
 # of the points, but this could also be the circumference of a country for
-# example.
+# example, or the path of a road.
 
-# Extract the coordinates of the points and plot in a coordinate system:
+# We have a separate plotting function in ggplot2 for plotting the geometrical
+# features in an "sf-object": geom_sf(), which needs to know the
+# "geometry"-aestethic (which in this case is the column named "geometry"):
+ggplot(CholeraDeaths) +
+  geom_sf(aes(geometry = geometry))
+
+# We could also extract the coordinates of the points and plot the X and Y
+# coordinates in the normal way:
 cholera_coords <- as_tibble(st_coordinates(ColeraDeaths))
 ggplot(cholera_coords) +
-  geom_point(aes(x = X, y = Y)) +
-  coord_quickmap()
+  geom_point(aes(x = X, y = Y))
+
 
 # This is still just a very basic plot of the locations of the points in our
 # data set on a coordinate system with some sort of logintude and latitude on
@@ -114,11 +121,27 @@ m <- get_map(london, zoom = 17, source = "osm")
 ggmap(m) +
   geom_point(aes(x = X, y = Y, size = Count), data = cholera_latlon)
 
-# Voila!
+# Very good! Let us add the water pumps as well to complete the picture:
+pumps <- read_sf(folder, layer = "Pumps")
+pumps_latlon <- 
+  pumps %>% 
+  st_set_crs("+init=epsg:27700") %>% 
+  st_transform(st_crs("+init=epsg:4326")) %>% 
+  st_coordinates %>% 
+  as_tibble
+
+ggmap(m) +
+  geom_point(aes(x = X, y = Y, size = Count), data = cholera_latlon) +
+  geom_point(aes(x = X, y = Y), 
+             colour = "red",
+             size = 2,
+             alpha = .5,
+             data = pumps_latlon)
 
 # EXAMPLE 2: Water sources in Africa --------------
 
-# These packages contains shapefiles for the countries of the world (as well as a lot of other information about the countries)
+# These packages contains shapefiles for the countries of the world (as well as
+# a lot of other information about the countries)
 library(rnaturalearth)
 library(rnaturalearthdata)
 library(rgeos)
@@ -132,7 +155,7 @@ water <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday
 world <- ne_countries(scale = "medium", returnclass = "sf")
 
 # Let us concentrate on just one country, we filter out all other
-tanzania <- world[world$name == "Tanzania",]
+tanzania <- world %>% filter(name == "Tanzania")
 
 # We do the same for the water sources data. When making the plots later we will see that there are a couple of strange data points with latitude > 60. These are obviously not in Tanzania, so  just filter them out.
 tan_data <- 
@@ -141,15 +164,15 @@ tan_data <-
   filter(lat_deg < 60)                   # Some weird data points
 
 # We make a simple plot of the borders of the country using the plotting method geom_sf() that is especially built for these kind of shape-objects. 
-ggplot(st_geometry(tanzania)) +
-  geom_sf()
+ggplot(tanzania) +
+  geom_sf(aes(geometry = geometry))
 
 # Add the water sources in the normal way. The coordinate systems appears to be
 # compatible in this case, and the figure is in any case not so sensitive to
 # such discrepancies when we are working on such a large area, and not on the
 # street level as we did above.
-ggplot(st_geometry(tanzania)) +
-  geom_sf() +
+ggplot(tanzania) +
+  geom_sf(aes(geometry = geometry)) +
   geom_point(aes(x = lon_deg, y = lat_deg), 
              data = tan_data) 
 
@@ -158,8 +181,8 @@ ggplot(st_geometry(tanzania)) +
 # the installation of a font. I you want to use another theme, replace (or take
 # out) theme_fira() and scale_color_fira() below.
 library(firatheme)                # My favourite ggplot theme: https://github.com/vankesteren/firatheme
-ggplot(st_geometry(tanzania)) +
-  geom_sf(fill = "#00000050") +
+ggplot(tanzania) +
+  geom_sf(aes(geometry = geometry), fill = "#00000050") +
   geom_point(aes(x = lon_deg, y = lat_deg, colour = water_source), 
              data = tan_data) +
   xlab("") +
@@ -189,10 +212,10 @@ tan_waterways <- read_sf("tanzania_waterways")
 # We add the roads, waterways and cities to the map. Takes quite a lot of time
 # to create, but the result is really nice!
 ggplot(st_geometry(tanzania)) +
-  geom_sf(fill = "#00000050") +
+  geom_sf(fill = "#00000020") +
   geom_point(aes(x = lon_deg, y = lat_deg, colour = water_source), 
              data = tan_data,
-             alpha = .5) +
+             alpha = .3) +
   xlab("") +
   ylab("") +
   labs(colour = "") +
@@ -203,12 +226,12 @@ ggplot(st_geometry(tanzania)) +
         panel.grid.major = element_line(colour = "#00000020", 
                                         inherit.blank = FALSE),
         axis.text = element_text(colour = "#00000050")) +
-  geom_sf(data = st_geometry(tan_roads), colour = "#00000050") +
-  geom_point(aes(x = X, y = Y), data = tan_cities, size = 2) +
+  geom_sf(aes(geometry = geometry), data = tan_roads, colour = "#00000050") +
+  geom_sf(aes(geometry = geometry), data = tan_cities, size = 2) +
   geom_text(aes(x = X, y = Y, label = name), 
             data = tan_cities, 
             nudge_y = 0.3) +
-  geom_sf(data = st_geometry(tan_waterways), colour = "darkblue", alpha = .3)
+  geom_sf(aes(geometry = geometry), data = tan_waterways, colour = "darkblue", alpha = .3)
 
 # EXAMPLE 3: Water sources in Africa, continued ------------
 
@@ -268,9 +291,8 @@ ggplot(water_africa) +
   ggtitle("Share of active water sources") +
   labs(fill = "") +
   theme_fira() +
-  scale_colour_fira(na.value = "darkred") +
+  scale_colour_fira() +
   theme(axis.line = element_blank(),
         panel.grid.major = element_line(colour = "#00000020", 
                                         inherit.blank = FALSE),
         axis.text = element_text(colour = "#00000050"))
-
