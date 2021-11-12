@@ -54,7 +54,7 @@ nz %>%
   geom_line() + 
   ggtitle("Remaining pattern")
 
-# The problem is that we want to fit this data to every contry of the world.
+# The problem is that we want to fit this data to every country of the world.
 # There are ways to do this with what we learned in BAN420 in a fairly compact
 # way, for example by defining a function that fits the model for a given
 # country and extracts the information that we need, and then we can perhaps
@@ -100,7 +100,7 @@ by_country
 # that we already know. We can easily extract individual models:
 by_country %>% 
   filter(country == "Afghanistan") %>% 
-  pluck("model", 1) %>%                 # Plucking out a list from a data frame
+  pluck("model", 1) %>%         # Plucking out a list from a data frame {purrr}
   summary
   
 # We then want to add the residuals to each of the country-specific data sets.
@@ -155,7 +155,7 @@ diagnostics %>%
 # The worst fits seem to be for African countries:
 diagnostics %>% 
   ggplot(aes(x = continent, y = r.squared, colour = continent)) + 
-  geom_jitter(width = 0.5)
+  geom_jitter(width = 0.3)
 
 # We can pull out the countries with the worst fit, and look at them
 # specifically:

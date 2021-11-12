@@ -15,9 +15,18 @@
 # and Horton. The sp and rgdal-packages have been replaced by the sf-package.
 library(mdsr)        # Companion R package to the book, containing data
 library(sf)          # For spatial data, co-authoured by NHH Prof. Roger Bivand 
-library(ggmap)       # For drawing static maps as ggplots
+library(ggmap)       # For downloading streetmaps as ggplot2-objects.
 library(tidyverse)   # Data wrangling etc
 plot(CholeraDeaths)  # Simple plot of the data
+
+# Look at the data. The format is a little bit special. The simplest way to
+# store this data would be to have three column in a data frame: count, lat and
+# lon, but you see that we have a lot of different metadata here (some of which
+# we will come back to), and that the spatial information, which in this case is
+# the location of the adresses, is stored as a special geometrical object of the
+# type POINT.
+CholeraDeaths
+
 
 # When working with spatial data we typically need to deal with shape-files.
 # These files are more complicated than what we are used to, and we need
@@ -81,7 +90,8 @@ cholera_latlon <-
   st_transform(st_crs("+init=epsg:4326")) %>% 
   st_coordinates %>% 
   as_tibble %>% 
-  mutate(Count = ColeraDeaths$Count)     # Add the counts back in to the data
+  mutate(Count = ColeraDeaths$Count) %>%   # Add the counts back in to the data
+  as_tibble()
 
 # Define the box and download map:
 london <- make_bbox(cholera_latlon$X, 
@@ -92,7 +102,7 @@ ggmap(m)
 
 # Add the cholera data to the map:
 ggmap(m) +
-  geom_point(aes(x = X, y = Y, size = Count), data = as_tibble(cholera_latlon))
+  geom_point(aes(x = X, y = Y, size = Count), data = cholera_latlon)
 
 # The points are a little bit off, unfortunately, and this is because we have
 # not figured out what kind of coordinate system the original data has. In fact,
@@ -148,16 +158,20 @@ library(rgeos)
 
 # This is a data set that is published on the "Tidy Tuesday"-project, a Github
 # repository that publishes a new data set every week for the online data
-# science community to analyze. This data set contains information on water sources in the world, but mainly in Africa.
+# science community to analyze. This data set contains information on water
+# sources in the world, but mainly in Africa.
 water <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-05-04/water.csv")
 
-# Here, we make a data frame for all the countries of the world. This requires all of the three packages above to be loaded.
+# Here, we make a data frame for all the countries of the world. This requires
+# all of the three packages above to be loaded.
 world <- ne_countries(scale = "medium", returnclass = "sf")
 
 # Let us concentrate on just one country, we filter out all other
 tanzania <- world %>% filter(name == "Tanzania")
 
-# We do the same for the water sources data. When making the plots later we will see that there are a couple of strange data points with latitude > 60. These are obviously not in Tanzania, so  just filter them out.
+# We do the same for the water sources data. When making the plots later we will
+# see that there are a couple of strange data points with latitude > 60. These
+# are obviously not in Tanzania, so  just filter them out.
 tan_data <- 
   water %>% 
   filter(country_name == "Tanzania") %>% 
@@ -192,8 +206,7 @@ ggplot(tanzania) +
   theme_fira() +
   scale_colour_fira(na.value = "darkred") +
   theme(axis.line = element_blank(),
-        panel.grid.major = element_line(colour = "#00000020", 
-                                        inherit.blank = FALSE),
+        panel.grid.major = element_line(colour = "#00000020"), 
         axis.text = element_text(colour = "#00000050"))
 
 # Downloaded shapefiles for other features of Tanzania here:
@@ -291,7 +304,6 @@ ggplot(water_africa) +
   ggtitle("Share of active water sources") +
   labs(fill = "") +
   theme_fira() +
-  scale_colour_fira() +
   theme(axis.line = element_blank(),
         panel.grid.major = element_line(colour = "#00000020", 
                                         inherit.blank = FALSE),
