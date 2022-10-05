@@ -124,26 +124,4 @@ auc_tree <-
               mutate(where = "train")) %>% 
   mutate(model = "decision_tree")
 
-# Exercise: The classification tree is relatively simple, and is very dependent
-# on the initial split. This means that there might very well be an initial
-# split that gives a less clean split in the first step, but gives a better
-# prediction after later splits.
-#
-# One way to solve this is to grow many trees, in which only a random subset of
-# the variables are available at each split. One can grow hundreds and thousands
-# of such prediction trees and average the predictions. This results in the
-# *random forest* algorithm.
-
-# The random forest can be improved in a couple of somewhat technical ways,
-# leading to the very popular xgboost-algorithm, see
-# https://en.wikipedia.org/wiki/XGBoost. See also the following master thesis
-# from NTNU (with almost 200 citations in the scientific literature!!!):
-# https://ntnuopen.ntnu.no/ntnu-xmlui/handle/11250/2433761.
-
-# Tune an xgboost model to the e-mail spam data set. Does is give better
-# predictions than the random forest?
-
-# See this blog post for a demonstration of tuning xgboost using tidymodels:
-# Taken from: https://juliasilge.com/blog/xgboost-tune-volleyball/
-
 

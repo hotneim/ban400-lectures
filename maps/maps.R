@@ -90,8 +90,8 @@ cholera_latlon <-
   st_transform(st_crs("+init=epsg:4326")) %>% 
   st_coordinates %>% 
   as_tibble %>% 
-  mutate(Count = ColeraDeaths$Count) %>%   # Add the counts back in to the data
-  as_tibble()
+  mutate(Count = ColeraDeaths$Count)   # Add the counts back in to the data
+
 
 # Define the box and download map:
 london <- make_bbox(cholera_latlon$X, 
