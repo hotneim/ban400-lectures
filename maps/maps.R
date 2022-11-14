@@ -97,7 +97,7 @@ cholera_latlon <-
 london <- make_bbox(cholera_latlon$X, 
                     cholera_latlon$Y, 
                     f = .05)
-m <- get_map(london, zoom = 17, source = "osm")
+m <- get_map(london, zoom = 17, source = "stamen")
 ggmap(m)
 
 # Add the cholera data to the map:
@@ -126,7 +126,7 @@ cholera_latlon <-
 london <- make_bbox(cholera_latlon$X, 
                     cholera_latlon$Y, 
                     f = .05)
-m <- get_map(london, zoom = 17, source = "osm")
+m <- get_map(london, zoom = 17, source = "stamen")
 
 ggmap(m) +
   geom_point(aes(x = X, y = Y, size = Count), data = cholera_latlon)
@@ -147,6 +147,10 @@ ggmap(m) +
              size = 2,
              alpha = .5,
              data = pumps_latlon)
+
+# The coordinate system was important in this example because we are working
+# with street maps. Maybe it is not that critical when working with countries
+# and continents.
 
 # EXAMPLE 2: Water sources in Africa --------------
 
@@ -190,11 +194,9 @@ ggplot(tanzania) +
   geom_point(aes(x = lon_deg, y = lat_deg), 
              data = tan_data) 
 
-# Make a nice map. I have used the fira-theme, becuase it is very nice. You need
-# to install this yourself by following the link below, and that also requires
-# the installation of a font. I you want to use another theme, replace (or take
-# out) theme_fira() and scale_color_fira() below.
-library(firatheme)                # My favourite ggplot theme: https://github.com/vankesteren/firatheme
+# Make a nice map. 
+library(RColorBrewer) # Color palettes
+
 ggplot(tanzania) +
   geom_sf(aes(geometry = geometry), fill = "#00000050") +
   geom_point(aes(x = lon_deg, y = lat_deg, colour = water_source), 
@@ -203,8 +205,8 @@ ggplot(tanzania) +
   ylab("") +
   labs(colour = "") +
   ggtitle("Water sources in Tanzania") +
-  theme_fira() +
-  scale_colour_fira(na.value = "darkred") +
+  theme_minimal() +
+  scale_colour_brewer(palette = "Paired", na.value = "darkred") +
   theme(axis.line = element_blank(),
         panel.grid.major = element_line(colour = "#00000020"), 
         axis.text = element_text(colour = "#00000050"))
@@ -233,8 +235,8 @@ ggplot(st_geometry(tanzania)) +
   ylab("") +
   labs(colour = "") +
   ggtitle("Water sources in Tanzania") +
-  theme_fira() +
-  scale_colour_fira(na.value = "darkred") +
+  theme_minimal() +
+  scale_colour_brewer(palette = "Paired", na.value = "darkred") +
   theme(axis.line = element_blank(),
         panel.grid.major = element_line(colour = "#00000020", 
                                         inherit.blank = FALSE),
@@ -303,7 +305,7 @@ ggplot(water_africa) +
     high = "red") +
   ggtitle("Share of active water sources") +
   labs(fill = "") +
-  theme_fira() +
+  theme_minimal() +
   theme(axis.line = element_blank(),
         panel.grid.major = element_line(colour = "#00000020", 
                                         inherit.blank = FALSE),
