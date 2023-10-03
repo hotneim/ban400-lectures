@@ -1,0 +1,76 @@
+@import url(https://fonts.googleapis.com/css?family=Benne:400,700,400italic,700italic);
+
+.reveal .slide-logo {
+  display: block;
+  position: fixed;
+  bottom: unset !important;
+  right: 40px !important;
+  height: 200px !important;
+  max-width: unset !important;
+  max-height: unset !important;
+  top: 20px;
+  left: unset !important;
+}
+
+/*-- scss:defaults --*/
+
+// fonts
+$font-family-sans-serif: "Times New Roman", "Benne" !default;
+
+// colors
+$body-bg: #ffffff !default;
+$body-color: #000 !default;
+$link-color: #51483d !default;
+$selection-bg: #26351c !default;
+
+// headings
+$presentation-heading-font: "Arial" !default;
+$presentation-heading-color: #003951 !default;
+
+/*-- scss:rules --*/
+
+#title-slide {
+  text-align: left;
+
+  .title {
+    color: $presentation-heading-color;
+    font-family: "Arial";
+    font-size: 2.5em;
+    font-weight: 700;
+    font-style: bold;
+  }
+
+  .subtitle {
+    font-size: 1.2em;
+    color: $body-color;
+    font-family: "Arial";
+    font-style: italic;
+    margin-top: 0em;
+  }
+
+  .institute,
+  .quarto-title-affiliation,
+  .quarto-title-author-email {
+    font-style: italic;
+    // font-size: 80%;
+    // color: #7F7F7F;
+  }
+
+  .author,
+  .quarto-title-author-name {
+    color: $body-color;
+    font-family: "Arial";
+  }
+
+  .quarto-title-authors {
+    display: flex;
+    justify-content: left;
+
+    .quarto-title-author {
+      padding-left: 0em;
+      padding-right: 0em;
+      width: 100%;
+    }
+  }
+
+}
