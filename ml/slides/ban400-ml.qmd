@@ -26,7 +26,7 @@ options(knitr.kable.NA = '')
 - We will only give a superficial treatment today (for completeness). The topic is covered in detail in [BAN404 - Predictive Analytics with R](https://www.nhh.no/en/courses/predictive-analytics-with-r/), due to run in the spring.
 
 
-### Literature
+### Litterature
 
 - The standard basic reference to statistical learning (and textbook in BAN404) is [ISL](https://www.statlearning.com/).
 - [ESL](https://web.stanford.edu/~hastie/ElemStatLearn/) is a more advanced book.
@@ -77,7 +77,7 @@ telco <-
 - We have access to a database of current and previous subscribers at a large American cell phone company (Telco).
 - [Data source at Kaggle.](https://www.kaggle.com/blastchar/telco-customer-churn)
 - Number of observations: $n = `r nrow(telco)`$.
-- We know the length of the customer relationship, how much the customer pays each month, and wheter the customer has ended the subscription (churn).
+- We know the length of the customer relationship, how much the customer pays each month, and whether the customer has ended the subscription (churn).
     - The classical inference question: to what degree do the two variables explain the probability of churn?
     - The ML-question: How can we classify current customers as either loyal or at risk of ending their subscription? Who do we pick out for targeted marketing?
 
@@ -396,7 +396,11 @@ We can measure the performance of prediction models in many ways.
 
 ::: {.column width="50%"}
 
-![](the-9-pitfalls-of-data-science.jpg){width="400" fig-pos='c'}
+![](the-9-pitfalls-of-data-science.jpg){width="170" fig-pos='c'}
+![](wmd.jpg){width="170" fig-pos='c'}
+![](surv-capitalism.jpg){width="170" fig-pos='c'}
+![](ijf.jpg){width="170" fig-pos='c'}
+
 :::
 
 ::: {.column width="50%"}
