@@ -1,0 +1,31 @@
+---
+title: ''
+output: pdf_document
+---
+
+\pagenumbering{gobble}
+
+```{r, message = FALSE, echo = FALSE, fig.height = 9}
+library(ggplot2)
+library(dplyr)
+
+telco <- readr::read_csv("telco-customer-churn/WA_Fn-UseC_-Telco-Customer-Churn.csv") %>% 
+  select(Churn, MonthlyCharges, tenure) %>% 
+  mutate(Churn = as.factor(Churn))
+
+par(mfrow = c(2,1))
+
+for(i in 1:2){
+  plot(telco$MonthlyCharges, telco$tenure, 
+     xlab = "Monthly charge ($)",
+     ylab = "Tenure (months)",
+     pch = 20,
+     col = ifelse(telco$Churn == "Yes",
+                  yes = alpha("red", .7),
+                  no = alpha("black", .15)),
+     bty = "l")
+     grid(col = "grey70")
+}
+
+```
+
