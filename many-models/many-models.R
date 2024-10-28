@@ -60,7 +60,8 @@ nz %>%
 # a given country and extracts the information that we need, and then we can
 # perhaps fill an empty data frame using a for-loop. We can do this in a much
 # neater way still, and start by creating a nested data frame:
-by_country <- gapminder %>% 
+by_country <- 
+  gapminder %>% 
   group_by(country, continent) %>% 
   nest()                                   # From the tidyr-package
 
@@ -73,7 +74,7 @@ by_country %>%
   filter(country == "Afghanistan") %>% 
   ungroup() %>%    
   select(data) %>% 
-  pull
+  pull()
 
 # Let us define a function that fits the model to the country-specific data
 # frame, that we can supply to the map()-function afterwards:
@@ -87,7 +88,7 @@ models <- map(by_country$data, country_model)
 # This returns a model object for each country as an element in a list. But
 # given that we are able to store the country specific data-frames in a column
 # in a data frame with one country per row, wouldn't it be nice if we can just
-# store the model object in the same data frame as well? We can du that easily
+# store the model object in the same data frame as well? We can do that easily
 # by putting the mapping inside a mutate, that creates this column for us:
 by_country <- 
   by_country %>% 
@@ -105,7 +106,7 @@ by_country %>%
   
 # We then want to add the residuals to each of the country-specific data sets.
 # We use the map2()-function because we can then specify first the data frame
-# and then the column that we are goint to loop over:
+# and then the column that we are going to loop over:
 by_country <- by_country %>% 
   mutate(
     resids = map2(data, model, add_residuals)

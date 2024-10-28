@@ -47,12 +47,13 @@ tidy(fitted_logistic)
 
 # Draw the decision boundary for logistic regression:
 newdata <- 
-  expand.grid(MonthlyCharges = seq(from = 20, 
-                                   to = 120, 
-                                   length.out = grid_resolution),
-            tenure = seq(from = 0, 
-                         to = 80, 
-                         length.out = grid_resolution))
+  expand.grid(
+    MonthlyCharges = seq(from = 20, 
+                         to = 120, 
+                         length.out = grid_resolution),
+    tenure = seq(from = 0, 
+                 to = 80, 
+                 length.out = grid_resolution))
 
 predictions <- 
   newdata %>% 
@@ -141,7 +142,7 @@ knn_workflow <-
 # Make a search grid for the k-parameter
 knn_grid <- grid_latin_hypercube(
   neighbors(c(3, round(nrow(telco)/5))),
-  size = 15
+  size = 7
 )
 
 # Calculate the cross-validated AUC for all the k's in the grid
